@@ -74,7 +74,29 @@ std::vector<cv::Point> FillGaps(const std::vector<cv::Point>& perimeter) {
     cv::Point last_entry = perimeter[perimeter.size() - 1];
 
     for (const cv::Point& i : perimeter) {
-       
+
+        // if gap is bigger than 1 pixel fill it
+        for (cv::Point diff = i - last_entry; abs(diff.x) > 1 || abs(diff.y) > 1; diff = i - last_entry) {
+            cv::Point p = last_entry;
+
+            if (abs(diff.x) > 1) {
+                if (diff.x > 0)
+                    p.x += 1;
+                if (diff.x < 0)
+                    p.x -= 1;
+                p.y = i.y;
+            }
+            if (abs(diff.y) > 1) {
+                if (diff.y > 0)
+                    p.y += 1;
+                if (diff.y < 0)
+                    p.y -= 1;
+                p.x = i.x;
+            }
+
+            new_vec.push_back(p);
+            last_entry = p;
+        }
 
         new_vec.push_back(i);
     }
