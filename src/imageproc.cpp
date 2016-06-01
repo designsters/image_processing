@@ -68,6 +68,34 @@ std::vector<cv::Point> ImageProc::FindPerimeter(const cv::Mat& region, const cv:
     return perimeter;
 }
 
+std::vector<cv::Point> FillGaps(const std::vector<cv::Point>& perimeter) {
+    std::vector<cv::Point> new_vec;
+
+    cv::Point last_entry = perimeter[perimeter.size() - 1];
+
+    for (const cv::Point& i : perimeter) {
+       
+
+        new_vec.push_back(i);
+    }
+
+    return new_vec;
+}
+
+std::vector<cv::Point> RemoveSuccessiveDuplicates(const std::vector<cv::Point>& perimeter) {
+    std::vector<cv::Point> new_vec;
+
+    cv::Point last_entry = perimeter[perimeter.size() - 1];
+    for (const cv::Point& i : perimeter) {
+        if (i != last_entry) {
+            new_vec.push_back(i);
+            last_entry = i;
+        }
+    }
+
+    return new_vec;
+}
+
 double Gaussian(int x, double m, double s)
 {
     return (1. / (s * sqrt(2 * 3.141592))) * exp(-0.5 * pow((x - m) / s, 2.0));
@@ -86,7 +114,7 @@ std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& 
     size_t centre = core_size / 2 + 1;
 
     // Core initialization
-    for (int i = 0; i < core_size; i++) {
+    for (size_t i = 0; i < core_size; i++) {
         core[i] = Gaussian(i, centre, smooth_factor);
     }
 
@@ -112,6 +140,9 @@ std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& 
     for (size_t i = 0; i < smoothed_perimeter.size(); i++) {
         smoothed_perimeter[i] = get_smoothed(i);
     }
+
+    smoothed_perimeter = RemoveSuccessiveDuplicates(smoothed_perimeter);
+    smoothed_perimeter = FillGaps(smoothed_perimeter);
 
     return smoothed_perimeter;
 }
