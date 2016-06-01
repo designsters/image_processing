@@ -143,19 +143,21 @@ std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& 
     double core_weight = std::accumulate(core.begin(), core.end(), 0.);
 
     auto get_smoothed = [&](size_t index) -> cv::Point {
-        cv::Point p;
+        double x = 0;
+        double y = 0;
 
         for (int i = 0; i < core.size(); i++) {
             int new_index = i - centre + index;
-            if (new_index < 0)
+            while (new_index < 0)
                 new_index += perimeter.size();
-            if (new_index >= perimeter.size())
+            while (new_index >= perimeter.size())
                 new_index -= perimeter.size();
 
-            p += perimeter[new_index] * core[i];
+            x += perimeter[new_index].x * core[i];
+            y += perimeter[new_index].y * core[i];
         }
 
-        return cv::Point(p.x / core_weight, p.y / core_weight);
+        return cv::Point(x / core_weight, y / core_weight);
     };
 
     //Smooth all point of given perimeter. 
@@ -164,7 +166,7 @@ std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& 
     }
 
     smoothed_perimeter = RemoveSuccessiveDuplicates(smoothed_perimeter);
-    smoothed_perimeter = FillGaps(smoothed_perimeter);
+    //smoothed_perimeter = FillGaps(smoothed_perimeter);
 
     return smoothed_perimeter;
 }
