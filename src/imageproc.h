@@ -36,12 +36,12 @@ namespace ImageProc {
     /*
     Smooths perimeter
     */
-    std::vector<cv::Point> SmoothPerimeter(const  std::vector<cv::Point>& perimeter, int smooth_factor);
+    std::vector<cv::Point> SmoothPerimeter(const  std::vector<cv::Point>& perimeter, double smooth_factor);
 
     /*
     Smooths all perimeters
     */
-    std::vector<std::vector<cv::Point>> SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeter, int smooth_factor);
+    std::vector<std::vector<cv::Point>> SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeter, double smooth_factor);
 
 
     /*

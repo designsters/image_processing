@@ -68,17 +68,32 @@ std::vector<cv::Point> ImageProc::FindPerimeter(const cv::Mat& region, const cv:
     return perimeter;
 }
 
-std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& perimeter, int smooth_factor) {
+double Gaussian(int x, double m, double s)
+{
+    return (1. / (s * sqrt(2 * 3.141592))) * exp(-0.5 * pow((x - m) / s, 2.0));
+};
+
+std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& perimeter, double smooth_factor) {
 
     std::vector<cv::Point> smoothed_perimeter(perimeter.size());
 
-    std::vector<int> core = { 1, 3, 16, 3, 1 }; // Smoothing core
-    int core_weight = std::accumulate(core.begin(), core.end(), 0);
+    size_t core_size = 2 * (smooth_factor * 3 * sqrt(2 * 3.141592) / 4.);
+    if (core_size % 2 == 0)
+        core_size += 1;
+
+    std::vector<double> core(core_size); // Smoothing core
+
+    size_t centre = core_size / 2 + 1;
+
+    // Core initialization
+    for (int i = 0; i < core_size; i++) {
+        core[i] = Gaussian(i, centre, smooth_factor);
+    }
+
+    double core_weight = std::accumulate(core.begin(), core.end(), 0.);
 
     auto get_smoothed = [&](size_t index) -> cv::Point {
         cv::Point p;
-
-        size_t centre = core.size() / 2 + 1;
 
         for (int i = 0; i < core.size(); i++) {
             int new_index = i - centre + index;
@@ -101,7 +116,7 @@ std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& 
     return smoothed_perimeter;
 }
 
-std::vector<std::vector<cv::Point>> ImageProc::SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeter, int smooth_factor) {
+std::vector<std::vector<cv::Point>> ImageProc::SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeter, double smooth_factor) {
 
     std::vector<std::vector<cv::Point>> smoothed_perimeter;
 
