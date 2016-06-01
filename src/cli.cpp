@@ -10,6 +10,7 @@ const std::string help_string = "Supported commands:\n"\
                                 "    region <x> <y> - add new region\n"
                                 "    display - show regions and perimeters in a window\n"
                                 "    clean - delete all regions\n"
+                                "    smooth - smooth perimeters\n"
                                 "    store <file name> - store regions and perimeters data into a file\n"
                                 "    help - show a list of commands\n"
                                 "    exit - terminate the program\n";
@@ -69,6 +70,12 @@ void DisplayCommand(cv::Mat& image, const std::vector<cv::Mat>& regions, const V
     DisplayImage(win_name, image);
 }
 
+void SmoothCommand(Vec3D<cv::Point>& perimeters) {
+    for (auto& i : perimeters) {
+        i = ImageProc::SmoothPerimeter(i, 4);
+    }
+}
+
 void CleanCommand(const cv::Mat& image, cv::Mat& displayed_image, std::vector<cv::Mat>& regions, Vec3D<cv::Point>& perimeters) {
     regions.clear();
     perimeters.clear();
@@ -94,6 +101,7 @@ void CommandLoop(const cv::Mat& image) {
     using std::cref;
     command_map["region"]  = std::bind(NewRegionCommand, cref(image), ref(regions), ref(perimeters));
     command_map["display"] = std::bind(DisplayCommand, ref(displayed_image), cref(regions), cref(perimeters));
+    command_map["smooth"]  = std::bind(SmoothCommand, ref(perimeters));
     command_map["clean"]   = std::bind(CleanCommand, cref(image), ref(displayed_image), ref(regions), ref(perimeters));
     command_map["store"]   = std::bind(StoreCommand, cref(regions), cref(perimeters));
     command_map["help"]    = []() { std::cout << help_string << '\n'; };

@@ -28,6 +28,8 @@ void DisplayCommand(cv::Mat& image, const std::vector<cv::Mat>& regions, const V
 
 void CleanCommand(const cv::Mat& image, cv::Mat& displayed_image, std::vector<cv::Mat>& regions, Vec3D<cv::Point>& perimeters);
 
+void SmoothCommand(Vec3D<cv::Point>& perimeters);
+
 void StoreCommand(const std::vector<cv::Mat>& regions, const Vec3D<cv::Point>& perimeters);
 
 void CommandLoop(const cv::Mat& image);
