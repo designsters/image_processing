@@ -68,7 +68,7 @@ std::vector<cv::Point> ImageProc::FindPerimeter(const cv::Mat& region, const cv:
     return perimeter;
 }
 
-std::vector<cv::Point> RemoveSuccessiveDuplicates(const std::vector<cv::Point>& perimeter) {
+std::vector<cv::Point> ImageProc::RemoveSuccessiveDuplicates(const std::vector<cv::Point>& perimeter) {
     std::vector<cv::Point> new_vec;
 
     cv::Point last_entry = perimeter[perimeter.size() - 1];
@@ -82,63 +82,58 @@ std::vector<cv::Point> RemoveSuccessiveDuplicates(const std::vector<cv::Point>& 
     return new_vec;
 }
 
-double Gaussian(int x, double m, double s)
-{
-    return (1. / (s * sqrt(2 * 3.141592))) * exp(-0.5 * pow((x - m) / s, 2.0));
-};
-
 std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& perimeter, double smooth_factor) {
 
     std::vector<cv::Point> smoothed_perimeter(perimeter.size());
 
-    size_t core_size = 2 * (smooth_factor * 3 * sqrt(2 * 3.141592) / 4.);
+    auto gaussian = [](int x, double m, double s) -> double { return (1. / (s * sqrt(2 * 3.141592))) * exp(-0.5 * pow((x - m) / s, 2.0)); };
+
+    size_t core_size = static_cast<size_t>(2 * (smooth_factor * 3 * sqrt(2 * 3.141592) / 4.));
     if (core_size % 2 == 0)
         core_size += 1;
+    size_t centre = core_size / 2 + 1;
 
     std::vector<double> core(core_size); // Smoothing core
 
-    size_t centre = core_size / 2 + 1;
-
     // Core initialization
     for (size_t i = 0; i < core_size; i++) {
-        core[i] = Gaussian(i, centre, smooth_factor);
+        core[i] = gaussian(i, centre, smooth_factor);
     }
 
     double core_weight = std::accumulate(core.begin(), core.end(), 0.);
 
-    auto get_smoothed = [&](size_t index) -> cv::Point {
+    // returns smoothed point
+    auto smooth = [&core, &centre, &core_weight, &perimeter](size_t index) -> cv::Point {
         double x = 0;
         double y = 0;
 
-        for (int i = 0; i < core.size(); i++) {
+        for (size_t i = 0; i < core.size(); i++) {
             int new_index = i - centre + index;
-            while (new_index < 0)
+            while (new_index < 0) 
                 new_index += perimeter.size();
-            while (new_index >= perimeter.size())
+            while (new_index >= static_cast<int>(perimeter.size()))
                 new_index -= perimeter.size();
 
             x += perimeter[new_index].x * core[i];
             y += perimeter[new_index].y * core[i];
         }
 
-        return cv::Point(x / core_weight, y / core_weight);
+        return cv::Point(static_cast<int>(x / core_weight), static_cast<int>(y / core_weight));
     };
 
     //Smooth all point of given perimeter. 
     for (size_t i = 0; i < smoothed_perimeter.size(); i++) {
-        smoothed_perimeter[i] = get_smoothed(i);
+        smoothed_perimeter[i] = smooth(i);
     }
 
-    smoothed_perimeter = RemoveSuccessiveDuplicates(smoothed_perimeter);
-
-    return smoothed_perimeter;
+    return RemoveSuccessiveDuplicates(smoothed_perimeter);
 }
 
-std::vector<std::vector<cv::Point>> ImageProc::SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeter, double smooth_factor) {
+std::vector<std::vector<cv::Point>> ImageProc::SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeters, double smooth_factor) {
 
     std::vector<std::vector<cv::Point>> smoothed_perimeter;
 
-    for (const std::vector<cv::Point>& p : perimeter) {
+    for (const std::vector<cv::Point>& p : perimeters) {
         smoothed_perimeter.push_back(SmoothPerimeter(p, smooth_factor));
     }
 

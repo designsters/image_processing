@@ -35,13 +35,19 @@ namespace ImageProc {
 
     /*
     Smooths perimeter
+    params: perimeter - perimeter to be smoothed
+            smooth_factor - dispersion for gauss smoothing
+    returns: smoothed perimeter
     */
     std::vector<cv::Point> SmoothPerimeter(const  std::vector<cv::Point>& perimeter, double smooth_factor);
 
     /*
-    Smooths all perimeters
+    Smooths all perimeters in vector
+    params: perimeters - perimeters to be smoothed
+        smooth_factor - dispersion for gauss smoothing
+    returns: smoothed perimeters
     */
-    std::vector<std::vector<cv::Point>> SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeter, double smooth_factor);
+    std::vector<std::vector<cv::Point>> SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeters, double smooth_factor);
 
 
     /*
@@ -65,6 +71,8 @@ namespace ImageProc {
     Checks whether the point does not equal to zero.
     */
     bool PointIsMarked(const cv::Mat& image, const cv::Point& p);
+
+    std::vector<cv::Point> RemoveSuccessiveDuplicates(const std::vector<cv::Point>& perimeter);
 }
 
 
