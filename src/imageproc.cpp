@@ -67,9 +67,25 @@ std::vector<cv::Point> ImageProc::FindPerimeter(const cv::Mat& region, const cv:
     return perimeter;
 }
 
+
+
 std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& perimeter, int smooth_factor) {
 
-	return std::vector<cv::Point>();
+	std::vector<cv::Point> smoothed_perimeter(perimeter.size());
+	std::vector<int> core = { 1, 3, 16, 3, 1 };
+
+	auto get_smoothed = [&](size_t index) -> cv::Point {
+		// stub
+		return cv::Point();
+	};
+
+	//Smooth all point of given perimeter. 
+	for (size_t i = 0; i < smoothed_perimeter.size(); i++) {
+		smoothed_perimeter[i] = get_smoothed(i);
+	}
+	
+
+	return smoothed_perimeter;
 }
 
 bool ImageProc::PointBelongsToImage(const cv::Mat& image, const cv::Point& p) {
