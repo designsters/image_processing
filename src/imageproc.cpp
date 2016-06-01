@@ -1,5 +1,6 @@
 #include "imageproc.h"
 #include <set>
+#include <numeric>
 
 std::vector<std::vector<cv::Point>> ImageProc::FindPerimeter(const cv::Mat& region) {
 
@@ -67,25 +68,48 @@ std::vector<cv::Point> ImageProc::FindPerimeter(const cv::Mat& region, const cv:
     return perimeter;
 }
 
-
-
 std::vector<cv::Point> ImageProc::SmoothPerimeter(const std::vector<cv::Point>& perimeter, int smooth_factor) {
 
-	std::vector<cv::Point> smoothed_perimeter(perimeter.size());
-	std::vector<int> core = { 1, 3, 16, 3, 1 };
+    std::vector<cv::Point> smoothed_perimeter(perimeter.size());
 
-	auto get_smoothed = [&](size_t index) -> cv::Point {
-		// stub
-		return cv::Point();
-	};
+    std::vector<int> core = { 1, 3, 16, 3, 1 }; // Smoothing core
+    int core_weight = std::accumulate(core.begin(), core.end(), 0);
 
-	//Smooth all point of given perimeter. 
-	for (size_t i = 0; i < smoothed_perimeter.size(); i++) {
-		smoothed_perimeter[i] = get_smoothed(i);
-	}
-	
+    auto get_smoothed = [&](size_t index) -> cv::Point {
+        cv::Point p;
 
-	return smoothed_perimeter;
+        size_t centre = core.size() / 2 + 1;
+
+        for (int i = 0; i < core.size(); i++) {
+            int new_index = i - centre + index;
+            if (new_index < 0)
+                new_index += perimeter.size();
+            if (new_index >= perimeter.size())
+                new_index -= perimeter.size();
+
+            p += perimeter[new_index] * core[i];
+        }
+
+        return cv::Point(p.x / core_weight, p.y / core_weight);
+    };
+
+    //Smooth all point of given perimeter. 
+    for (size_t i = 0; i < smoothed_perimeter.size(); i++) {
+        smoothed_perimeter[i] = get_smoothed(i);
+    }
+
+    return smoothed_perimeter;
+}
+
+std::vector<std::vector<cv::Point>> ImageProc::SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeter, int smooth_factor) {
+
+    std::vector<std::vector<cv::Point>> smoothed_perimeter;
+
+    for (const std::vector<cv::Point>& p : perimeter) {
+        smoothed_perimeter.push_back(SmoothPerimeter(p, smooth_factor));
+    }
+
+    return smoothed_perimeter;
 }
 
 bool ImageProc::PointBelongsToImage(const cv::Mat& image, const cv::Point& p) {

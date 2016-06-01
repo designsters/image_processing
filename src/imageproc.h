@@ -33,10 +33,15 @@ namespace ImageProc {
     */
     std::vector<cv::Point> FindPerimeter(const cv::Mat& region, const cv::Point& start_pos);
 
-	/*
-	Smooths perimeter
-	*/
-	std::vector<cv::Point> SmoothPerimeter(const  std::vector<cv::Point>& perimeter, int smooth_factor);
+    /*
+    Smooths perimeter
+    */
+    std::vector<cv::Point> SmoothPerimeter(const  std::vector<cv::Point>& perimeter, int smooth_factor);
+
+    /*
+    Smooths all perimeters
+    */
+    std::vector<std::vector<cv::Point>> SmoothPerimeter(const  std::vector<std::vector<cv::Point>>& perimeter, int smooth_factor);
 
 
     /*
