@@ -10,7 +10,7 @@ const std::string help_string = "Supported commands:\n"\
                                 "    region <x> <y> - add new region\n"
                                 "    display - show regions and perimeters in a window\n"
                                 "    clean - delete all regions\n"
-                                "    smooth - smooth perimeters\n"
+                                "    smooth <factor> - smooth perimeters\n"
                                 "    store <file name> - store regions and perimeters data into a file\n"
                                 "    help - show a list of commands\n"
                                 "    exit - terminate the program\n";
@@ -71,8 +71,11 @@ void DisplayCommand(cv::Mat& image, const std::vector<cv::Mat>& regions, const V
 }
 
 void SmoothCommand(Vec3D<cv::Point>& perimeters) {
+    double factor;
+    std::cin >> factor;
+
     for (auto& i : perimeters) {
-        i = ImageProc::SmoothPerimeter(i, 4);
+        i = ImageProc::SmoothPerimeter(i, factor);
     }
 }
 
